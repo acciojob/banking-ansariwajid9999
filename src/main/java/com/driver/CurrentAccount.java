@@ -1,94 +1,112 @@
 package com.driver;
 
+import java.util.PriorityQueue;
+
 public class CurrentAccount extends BankAccount{
     String tradeLicenseId; //consists of Uppercase English characters only
 
-    public CurrentAccount(String name, double balance, String tradeLicenseId) throws Exception {
+    public CurrentAccount(String name, double balance, String tradeLicenseId) throws Exception
+    {
         // minimum balance is 5000 by default. If balance is less than 5000, throw "Insufficient Balance" exception
-        super(name,balance,5000);
-        this.tradeLicenseId = tradeLicenseId;
-        if(balance < 5000){
-            throw new Exception("Insufficient Balance");
-        }
+
+        super(name, balance, 5000);
+        this.tradeLicenseId=tradeLicenseId;
+        if (balance < 5000) throw new Exception("Insufficient Balance");
+
+
+
+
     }
-    public String getTradeLicenseId() {
+
+    public void validateLicenseId() throws Exception
+    {
+        // A trade license Id is said to be valid if no two consecutive characters are same
+        // If the license Id is valid, do nothing
+        // If the characters of the license Id can be rearranged to create any valid license Id
+        // If it is not possible, throw "Valid License can not be generated" Exception
+
+
+        String s = tradeLicenseId;
+        if (isValid(s))
+        {
+            //do nothing..
+        } else if (isPossible(s))
+        {
+            //do nothing.. we did in ispossible function
+        } else throw new Exception("Valid License can not be generated");
+
+
+    }
+
+    public boolean isValid(String s)
+    {
+        int n=s.length();
+        for(int i=1;i<n;i++){
+            if(s.charAt(i)==s.charAt(i-1))return false;
+        }
+        return true;
+    }
+
+    class Pair{
+        char ch;
+        int fre;
+        public Pair(char ch,int  fre){
+            this.ch=ch;
+            this.fre=fre;
+        }
+
+    }
+    public  boolean isPossible(String s)
+    {
+        int n=s.length();
+        int[]fre=new int[26];
+        for(int i=0;i<n;i++)fre[s.charAt(i)-'A']++;
+        int limit=(n+1/2);
+        PriorityQueue<Pair>pq=new PriorityQueue<>((a,b)->{
+            return b.fre-a.fre;
+        });
+        for(int i=0;i<26;i++){
+            if(fre[i]>limit)return false;
+            else pq.add(new Pair((char)(i+'A'),fre[i]));
+        }
+
+        char[]ans=new char[n];
+        int index=0;
+        while(pq.size()>0 && index<n)
+        {
+            Pair p=pq.remove();
+            char ch=p.ch;
+            int freq=p.fre;
+            while(freq-->0 && index<n)
+            {
+                ans[index]=ch;
+                index+=2;
+            }
+        }
+        index=1;
+        while(pq.size()>0 && index<n)
+        {
+            Pair p=pq.remove();
+            char ch=p.ch;
+            int freq=p.fre;
+            while(freq-->0 && index<n)
+            {
+                ans[index]=ch;
+                index+=2;
+            }
+        }
+
+
+        tradeLicenseId=String.valueOf(ans);
+        return true;
+
+    }
+    public String getTradeLicenseId()
+    {
         return tradeLicenseId;
     }
 
     public void setTradeLicenseId(String tradeLicenseId) {
         this.tradeLicenseId = tradeLicenseId;
     }
-    public void validateLicenseId() throws Exception {
-        // A trade license Id is said to be valid if no two consecutive characters are same
-        // If the license Id is valid, do nothing
-        // If the characters of the license Id can be rearranged to create any valid license Id
-        // If it is not possible, throw "Valid License can not be generated" Exception
-        if(!isLicenseNumberValid(tradeLicenseId)){
-            String rearrangedId = rearrangeString(tradeLicenseId);
-            if(rearrangedId == ""){
-                throw new Exception("Valid License can not be generated");
-            }
-            else{
-                this.tradeLicenseId = rearrangedId;
-            }
-        }
-    }
-    public char getMaxCountChar(int[] count){
-        int max=0;
-        char ch=0;
-        for(int i=0;i<26;i++){
-            max = count[i];
-            ch=(char)((int)-'a'+1);
-        }
-        return ch;
-    }
-    public String rearrangeString(String S){
-        int n=S.length();
-        int[] count=new int[26];
-        for(int i=0;i<26;i++){
-            count[i]=0;
-        }
-        for(char ch : S.toCharArray()){
-            count[(int)ch - (int)'A']++;
-        }
-        char ch_max=getMaxCountChar(count);
-        int maxCount=count[(int)ch_max -(int)'A'];
-
-        if(maxCount > (n+1)/2) return "";
-        String res = "";
-        for(int i=0;i<n;i++){
-            res += ' ';
-        }
-        int ind=0;
-        while(maxCount > 0){
-            res = res.substring(0,ind) + ch_max
-                    + res.substring(ind+1);
-            ind += 2;
-            maxCount--;
-        }
-        count[(int)ch_max - (int)'A'] = 0;
-        for(int i=0;i<26;i++){
-            while(count[i] > 0){
-                ind=(ind >= n) ? 1 : ind;
-                res=res.substring(0,ind)
-                        +(char)((int)'A' + i)
-                        +res.substring(ind+1);
-
-                ind+=2;
-                count[i]--;
-            }
-        }
-        return res;
-    }
-    public boolean isLicenseNumberValid(String licenseId) {
-        for(int i=0;i<licenseId.length();i++){
-            if(licenseId.charAt(i) == licenseId.charAt(i+1)){
-                return false;
-            }
-        }
-        return true;
-    }
-
 }
-
-
